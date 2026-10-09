@@ -32,16 +32,21 @@ fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
     onUpdateCity: (City, City) -> Unit,
+    onDeleteCity: (City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
     var newProvinceName by remember { mutableStateOf("") }
     var showAddCityFields by remember { mutableStateOf(false) }
+
     var selectedCity by remember { mutableStateOf<City?>(null) }
     var editedCityName by remember { mutableStateOf("") }
     var editedProvinceName by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -50,6 +55,7 @@ fun CityListScreen(
                 modifier = Modifier.padding(16.dp),
                 onClick = {
                     showAddCityFields = !showAddCityFields
+
                     if (showAddCityFields) {
                         selectedCity = null
                         editedCityName = ""
@@ -60,12 +66,14 @@ fun CityListScreen(
                 Text("+")
             }
         }
+
         if (showAddCityFields) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
+
                 OutlinedTextField(
                     value = newCityName,
                     onValueChange = { newCityName = it },
@@ -81,12 +89,16 @@ fun CityListScreen(
                     label = { Text("Province") },
                     modifier = Modifier.weight(1f)
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
-                        if (newCityName.isNotBlank() && newProvinceName.isNotBlank()) {
+                        if (
+                            newCityName.isNotBlank() &&
+                            newProvinceName.isNotBlank()
+                        ) {
                             onAddCity(
                                 City(
                                     name = newCityName,
@@ -104,12 +116,14 @@ fun CityListScreen(
                 }
             }
         }
+
         if (selectedCity != null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
+
                 OutlinedTextField(
                     value = editedCityName,
                     onValueChange = { editedCityName = it },
@@ -132,6 +146,7 @@ fun CityListScreen(
                     modifier = Modifier.padding(vertical = 12.dp),
                     onClick = {
                         val cityToUpdate = selectedCity
+
                         if (
                             cityToUpdate != null &&
                             editedCityName.isNotBlank() &&
@@ -155,19 +170,42 @@ fun CityListScreen(
                 }
             }
         }
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+
+        if (selectedCity != null) {
+            Button(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onClick = {
+                    selectedCity?.let { city ->
+                        onDeleteCity(city)
+
+                        selectedCity = null
+                        editedCityName = ""
+                        editedProvinceName = ""
+                    }
+                }
+            ) {
+                Text("DELETE CITY")
+            }
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
             itemsIndexed(cities) { index, city ->
+
                 CityRow(
                     city = city,
                     onClick = {
                         showAddCityFields = false
                         newCityName = ""
                         newProvinceName = ""
+
                         selectedCity = city
                         editedCityName = city.name
                         editedProvinceName = city.province
                     }
                 )
+
                 if (index < cities.lastIndex) {
                     HorizontalDivider()
                 }
@@ -175,7 +213,6 @@ fun CityListScreen(
         }
     }
 }
-
 
 @Composable
 fun CityRow(
@@ -186,7 +223,10 @@ fun CityRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(
+                horizontal = 20.dp,
+                vertical = 16.dp
+            )
     ) {
         Text(
             text = city.name,
@@ -198,22 +238,6 @@ fun CityRow(
             text = city.province,
             fontSize = 30.sp,
             modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CityListScreenPreview() {
-    ListyCityTheme {
-        CityListScreen(
-            cities = listOf(
-                City("Edmonton", "AB"),
-                City("Vancouver", "BC"),
-                City("Calgary", "AB")
-            ),
-            onAddCity = {},
-            onUpdateCity = { _, _ -> }
         )
     }
 }
